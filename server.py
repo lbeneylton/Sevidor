@@ -1,10 +1,15 @@
 import socket
 import threading
+from dotenv import load_dotenv
 import os
 
-HOST = "0.0.0.0"
-PORT = 5000
-IMAGE_PATH = "tigre.jpg"
+load_dotenv()
+
+HOST = os.getenv("HOST_SERVER")
+PORT = int(os.getenv("PORTA_TCP", 5000))
+UDP_PORT = int(os.getenv("PORTA_UDP", 6000))
+IMAGE_PATH = os.getenv("IMAGE_PATH", "wallpaper.jpg")
+
 clientes: list[tuple] = []
 clientes_lock = threading.Lock()
 
