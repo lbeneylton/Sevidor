@@ -1,0 +1,10 @@
+screem.py
+*.exe
+*.log
+socket.md
+tempCodeRunnerFile.py
+*.jpg
+*.pyc
+install_server.bat
+install_client.bat
+.env
