@@ -1,18 +1,32 @@
 @echo off
+setlocal EnableExtensions EnableDelayedExpansion
 cls
 
-REM Setup inicial
-if "%1"=="--restarted" goto :after_python_install
 
-if not exist logs mkdir logs
-set LOGFILE=logs\logs_%ANO%-%MES%-%DIA%.txt
+REM depois: suporte offline com cache de wheels /modo CI silencioso / requirements.lock/ ajeitar os parses arguments
+
+REM Setup inicial
+if "%1"=="--restarted" (
+    shift
+    goto :after_python_install
+)
+
+set NO_INSTALL=0
+for %%A in (%*) do (
+    if "%%A"=="--no-install" set NO_INSTALL=1
+)
+
+REM flag para ativação direta
 
 REM ===== LOGFILE ======
-for /f "tokens=2 delims==" %%I in ('wmic os get LocalDateTime /value') do set DATETIME=%%I
+for /f %%I in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd"') do set DATETIME=%%I
 
 set ANO=%DATETIME:~0,4%
 set MES=%DATETIME:~4,2%
 set DIA=%DATETIME:~6,2%
+
+if not exist logs mkdir logs
+set LOGFILE=logs\logs_%ANO%-%MES%-%DIA%.txt
 
 
 REM Exclui a pasta logs de versionamentos
@@ -21,7 +35,6 @@ if not exist .gitignore (
 ) else (
     findstr /C:"/logs/" .gitignore >nul || echo /logs/ >> .gitignore
 )
-
 
 
 REM ===== CORES =====
@@ -67,6 +80,7 @@ if errorlevel 1 (
     start "" cmd /k "%~f0 --restarted"
     exit /b
 )
+
 
 REM Quando o bat é reiniciado começa daqui (ignorando instalação do python)
 :after_python_install
@@ -137,10 +151,48 @@ if errorlevel 1 (
 echo [+] Ambiente Virtual Iniciado
 echo.
 
+REM ===== FLAG --no-install =====
+if %NO_INSTALL%==1 (
+    color %COR_WARN%
+    echo [!] --no-install ativo. Pulando instalacao de dependencias.
+    echo [%date% %time:~0,8%] --no-install ativo >> %LOGFILE%
+    goto :end
+)
 
+REM ===== HASH DO REQUIREMENTS =====
+set INSTALL_REQ=1
+set REQ_HASH_FILE=.venv\.requirements.hash
+
+if exist requirements.txt (
+    REM Cria hash do requirements e salva no ambiente virtual
+    set CURRENT_HASH=
+    for /f "tokens=1" %%H in ('certutil -hashfile requirements.txt SHA256 ^| findstr /R /V "hash CertUtil"') do (
+        set CURRENT_HASH=%%H
+    )
+
+    if not defined CURRENT_HASH (
+        echo [!] Falha ao gerar hash do requirements.txt
+        set INSTALL_REQ=1
+    )
+
+    if exist %REQ_HASH_FILE% (
+        set /p OLD_HASH=<%REQ_HASH_FILE%
+        if "!OLD_HASH!"=="!CURRENT_HASH!" (
+            set INSTALL_REQ=0
+        )
+    )
+)
+
+
+if %INSTALL_REQ%==0 (
+    echo [A] requirements.txt inalterado. Pulando instalacao.
+    echo [%date% %time:~0,8%] requirements.txt inalterado >> %LOGFILE%
+    goto :end
+)
 
 REM ===== INSTALACAO DE DEPENDENCIAS =====
 if exist requirements.txt (
+    REM Cria Hash dos requirements e guarda no ambiente
     echo [I] Instalando dependencias...
     echo [%date% %time:~0,8%] Instalando requirements.txt >> %LOGFILE%
 
@@ -156,9 +208,12 @@ if exist requirements.txt (
 
     echo [+] Dependencias instaladas com sucesso
     echo [%date% %time:~0,8%] Dependencias instaladas >> %LOGFILE%
+
+    echo %CURRENT_HASH% > %REQ_HASH_FILE%
 ) else (
     echo [I] Nenhum requirements.txt encontrado
     echo [%date% %time:~0,8%] requirements.txt nao encontrado >> %LOGFILE%
 )
 
+:end
 echo.   
