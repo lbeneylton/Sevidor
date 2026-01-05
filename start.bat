@@ -3,7 +3,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 cls
 
 
-REM depois: suporte offline com cache de wheels /modo CI silencioso / requirements.lock/ ajeitar os parses arguments
+REM depois: criar o help /suporte offline com cache de wheels /modo CI silencioso / requirements.lock/ ajeitar os parses arguments
 
 REM Setup inicial
 if "%1"=="--restarted" (

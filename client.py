@@ -56,6 +56,7 @@ def resize_cover(input_path, screen_w, screen_h, output_path):
 # FUNÇÃO: solicitar imagem do servidor
 # -------------------------
 def solicitar_imagem():
+    # IPV4 TCP
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((HOST, PORT))
 
@@ -78,6 +79,9 @@ def solicitar_imagem():
     return client
 
 
+
+
+
 # -------------------------
 # FUNÇÃO: aplicar papel de parede
 # -------------------------
@@ -91,6 +95,11 @@ def alterar_papel_de_parede(caminho_imagem):
     except Exception as e:
         print(f"Falha ao alterar papel de parede: {e}")
         return "FALHA"
+
+
+
+def registrar():
+    
 
 
 # -------------------------
