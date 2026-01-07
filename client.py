@@ -99,7 +99,7 @@ def alterar_papel_de_parede(caminho_imagem):
 
 
 def registrar():
-    
+    pass
 
 
 # -------------------------

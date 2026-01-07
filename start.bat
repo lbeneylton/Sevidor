@@ -25,7 +25,8 @@ set ANO=%DATETIME:~0,4%
 set MES=%DATETIME:~4,2%
 set DIA=%DATETIME:~6,2%
 
-if not exist logs mkdir logs
+if not exist logs mkdir logs 
+
 set LOGFILE=logs\logs_%ANO%-%MES%-%DIA%.txt
 
 

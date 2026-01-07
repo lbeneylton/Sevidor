@@ -3,7 +3,7 @@ import threading
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+load_dotenv(dotenv_path=".env.example")
 
 HOST = os.getenv("HOST_SERVER")
 PORT = int(os.getenv("PORTA_TCP", 5000))
